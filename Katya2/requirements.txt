@@ -1,0 +1,14 @@
+customtkinter
+vosk
+edge-tts
+requests
+beautifulsoup4
+yt-dlp
+pycaw
+screen_brightness_control
+pygetwindow
+pywinauto
+psutil
+sounddevice
+numpy
+imageio-ffmpeg

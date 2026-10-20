@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="320" viewBox="0 0 1000 320">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0A0A0A"/>
+      <stop offset="1" stop-color="#06121A"/>
+    </linearGradient>
+    <linearGradient id="neon" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#00E5FF"/>
+      <stop offset="1" stop-color="#39FF14"/>
+    </linearGradient>
+  </defs>
+  <rect width="1000" height="320" fill="url(#bg)"/>
+  <g opacity="0.12" stroke="#00E5FF">
+    <path d="M0 40 H1000 M0 80 H1000 M0 120 H1000 M0 160 H1000 M0 200 H1000 M0 240 H1000 M0 280 H1000"/>
+    <path d="M40 0 V320 M80 0 V320 M120 0 V320 M160 0 V320 M200 0 V320 M240 0 V320 M280 0 V320 M320 0 V320 M360 0 V320 M400 0 V320 M440 0 V320 M480 0 V320 M520 0 V320 M560 0 V320 M600 0 V320 M640 0 V320 M680 0 V320 M720 0 V320 M760 0 V320 M800 0 V320 M840 0 V320 M880 0 V320 M920 0 V320 M960 0 V320"/>
+  </g>
+  <text x="60" y="150" font-family="Consolas, monospace" font-size="86" font-weight="bold" fill="url(#neon)">KATYA 2.0</text>
+  <text x="63" y="205" font-family="Consolas, monospace" font-size="30" fill="#8FA6B2">HYPER-DRIVE · локальный ИИ-агент для Windows</text>
+  <rect x="62" y="235" width="360" height="3" fill="#39FF14"/>
+  <text x="62" y="285" font-family="Consolas, monospace" font-size="20" fill="#5A6B75">Ollama · CustomTkinter · Vosk · edge-tts · yt-dlp</text>
+  <circle cx="900" cy="140" r="60" fill="none" stroke="#00E5FF" stroke-width="3" opacity="0.8"/>
+  <circle cx="900" cy="140" r="42" fill="none" stroke="#39FF14" stroke-width="2" opacity="0.6"/>
+  <circle cx="900" cy="140" r="10" fill="#39FF14"/>
+</svg>

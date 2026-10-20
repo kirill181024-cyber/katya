@@ -1,0 +1,9 @@
+Katya2/.venv/
+Katya2/models/
+Katya2/__pycache__/
+Katya2/data/*.json
+Katya2/pip_install.log
+Katya2/pr_body.md
+__pycache__/
+.venv/
+Katya2/*.lnk
