@@ -12,3 +12,5 @@ Katya2/skills/auto_*.py
 *.zip
 
 pkg/
+
+dist_setup/
