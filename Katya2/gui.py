@@ -1,5 +1,6 @@
 import math
 import threading
+from pathlib import Path
 
 import customtkinter as ctk
 
@@ -62,6 +63,13 @@ class KatyaApp(ctk.CTk):
         self.geometry("1040x720")
         self.minsize(880, 600)
         self.configure(fg_color=BG)
+
+        ico = Path(__file__).resolve().parent / "katya.ico"
+        if ico.exists():
+            try:
+                self.iconbitmap(str(ico))
+            except Exception:
+                pass
 
         self.brain = brain.Brain()
         self.speaker = tts.Speaker()
