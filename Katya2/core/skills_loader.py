@@ -67,6 +67,9 @@ def run(name, args=None):
     if not meta or not meta["func"]:
         return f"[skills] неизвестное действие: {name}"
     args = args or {}
+    if not isinstance(args, dict):
+        args = {"value": args, "name": args, "task": args, "text": args,
+                "url": args, "keyword": args, "percent": args}
     kwargs = {k: v for k, v in args.items()}
     try:
         result = meta["func"](**kwargs)
