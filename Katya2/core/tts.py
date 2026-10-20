@@ -35,7 +35,7 @@ def _play(path):
 
 
 class Speaker:
-    def __init__(self, voice=VOICE_FEMALE):
+    def __init__(self, voice=VOICE):
         self.voice = voice
         self._queue = []
         self._lock = threading.Lock()
@@ -79,7 +79,7 @@ def say(text, voice=None):
 def say_sync(text, voice=None):
     try:
         out = _TMP / f"tts_sync_{abs(hash(text)) % 10**8}.mp3"
-        _synthesize(text, out, voice or VOICE_FEMALE)
+        _synthesize(text, out, voice or VOICE)
         _play(out)
         out.unlink(missing_ok=True)
     except Exception as e:
