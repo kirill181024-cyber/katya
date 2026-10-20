@@ -1,4 +1,5 @@
 @echo off
+title Katya 2.10 - Hyper-Drive
 cd /d "%~dp0"
 if not exist "Katya2\.venv\Scripts\pythonw.exe" (
   echo Не найден venv: Katya2\.venv\Scripts\pythonw.exe
