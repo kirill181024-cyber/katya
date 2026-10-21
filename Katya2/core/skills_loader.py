@@ -89,3 +89,53 @@ def run_async(name, args, on_done=None):
     t = threading.Thread(target=_worker, daemon=True)
     t.start()
     return t
+
+
+def save_and_run_learned_skill(code_text, name="auto_learned", args=None,
+                               heal=True, max_fix=2):
+    """Сохраняет сгенерированный ИИ код в skills/ и динамически выполняет.
+
+    Регистрирует его действия в загрузчике. При падении (traceback)
+    пробует self-healing: просит мозг исправить код по логу ошибки.
+    """
+    from . import self_coder
+    args = args or {}
+    attempt = 0
+    last_err = ""
+    while attempt <= (max_fix if heal else 0):
+        code = self_coder._extract_code(code_text)
+        ok, err = self_coder._validate(code)
+        if not ok:
+            last_err = err
+        else:
+            path = self_coder.write_skill(code, name)
+            try:
+                mod, actions = self_coder.load_skill(path)
+                added = self_coder.register_actions(actions, name)
+                first = (added or list(actions.keys()))
+                if not first:
+                    return "Сгенерированный плагин не содержит действий."
+                target = next((a for a in first if not a.startswith("self.")), first[0])
+                if args:
+                    result = run(target, args)
+                else:
+                    result = f"Плагин «{name}» загружен, действия: {', '.join(added)}."
+                return result
+            except Exception:
+                last_err = traceback.format_exc()
+                path.unlink(missing_ok=True)
+        if not heal or attempt == max_fix:
+            break
+        attempt += 1
+        try:
+            from . import brain
+            fix_prompt = (
+                "Твой Python-плагин для агента Катя упал. Ниже лог ошибки. "
+                "Верни ТОЛЬКО исправленный Python-файл (без markdown), "
+                "с функциями и словарём ACTIONS в конце.\n\nЛОГ:\n" + last_err[-2000:])
+            code_text = brain._api(
+                [{"role": "user", "content": fix_prompt}],
+                self_coder.CODE_PROMPT.replace("%TASK%", "исправь ошибку"), timeout=240)
+        except Exception:
+            break
+    return f"Плагин не заработал после попыток. Последняя ошибка: {last_err[:300]}"

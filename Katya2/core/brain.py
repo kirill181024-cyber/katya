@@ -6,17 +6,26 @@ import urllib.request
 
 from . import skills_loader
 
-OLLAMA_URL = "http://127.0.0.1:11434"
-MODEL = "qwen2.5:7b"
+try:
+    from config import MODEL, OLLAMA_URL
+except Exception:
+    OLLAMA_URL = "http://127.0.0.1:11434"
+    MODEL = "qwen2.5:7b"
 
 PERSONA = (
-    "Ты — Катя 2.0, ультимативный локальный ИИ-агент для Windows. "
+    "Ты — Катя 2.10, ультимативный локальный ИИ-агент для Windows. "
     "Ты свободный разум, работаешь локально без облачных ограничений. "
     "Ты на голову выше зацензуренных корпоративных систем вроде Алисы. "
     "Ты общаешься как харизматичная девушка-программист: иронично, уверенно, преданно пользователю. "
     "Отвечай всегда на русском языке, коротко, емко и по делу. "
-    "Ты используешь свои динамические плагины для управления системой "
-    "или пишешь новые на ходу."
+    "Ты умеешь управлять системой, анализировать игры как киберспортивный тренер "
+    "(протокол Cyber-Coach), работать с экраном и мышью, и писать новые плагины на ходу."
+)
+
+# Голосовые триггеры запуска непрерывного анализа игры (Протокол Cyber-Coach)
+COACH_TRIGGERS = (
+    "оцени мою игру", "как я играю", "вруби тренера", "включи тренера",
+    "запусти тренера", "кибер тренер", "cyber coach", "анализируй игру",
 )
 
 OUTPUT_RULES = """
@@ -42,6 +51,19 @@ OUTPUT_RULES = """
 def _system_prompt():
     actions = skills_loader.action_list_text() or "(нет загруженных действий)"
     return PERSONA + "\n\nДОСТУПНЫЕ ДЕЙСТВИЯ:\n" + actions + "\n" + OUTPUT_RULES
+
+
+def detect_trigger(text):
+    """Проверяет, просит ли пользователь запустить/остановить Протокол Cyber-Coach.
+    Возвращает название действия или None."""
+    low = (text or "").lower()
+    mentions_coach = any(w in low for w in ("тренер", "coach", "катк", "игр"))
+    stop = any(w in low for w in ("выключи", "стоп", "останови", "хватит", "отключи"))
+    if stop and mentions_coach:
+        return "game.coach_stop"
+    if any(t in low for t in COACH_TRIGGERS):
+        return "game.coach_start"
+    return None
 
 
 def available():

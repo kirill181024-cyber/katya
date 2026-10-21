@@ -6,6 +6,8 @@ import urllib.request
 import zipfile
 from pathlib import Path
 
+from . import echo_guard
+
 MODELS_DIR = Path(__file__).resolve().parent.parent / "models"
 MODEL_NAME = "vosk-model-small-ru-0.22"
 MODEL_URL = f"https://alphacephei.com/vosk/models/{MODEL_NAME}.zip"
@@ -72,9 +74,15 @@ class Listener:
                         data = q.get(timeout=0.5)
                     except queue.Empty:
                         continue
+                    if echo_guard.muted():
+                        try:
+                            self._rec.Reset()
+                        except Exception:
+                            pass
+                        continue
                     if self._rec.AcceptWaveform(data):
                         text = json.loads(self._rec.Result()).get("text", "").strip()
-                        if text:
+                        if text and not echo_guard.muted():
                             self.on_text(text)
         except Exception as e:
             self.error = str(e)

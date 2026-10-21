@@ -4,6 +4,8 @@ import tempfile
 import threading
 from pathlib import Path
 
+from . import echo_guard
+
 VOICE = "ru-RU-DmitryNeural"
 VOICE_FEMALE = "ru-RU-SvetlanaNeural"
 _TMP = Path(tempfile.gettempdir()) / "katya2_tts"
@@ -59,11 +61,14 @@ class Speaker:
                 text, voice = self._queue.pop(0)
             try:
                 out = _TMP / f"tts_{abs(hash(text)) % 10**8}.mp3"
+                echo_guard.begin()
                 _synthesize(text, out, voice)
                 _play(out)
                 out.unlink(missing_ok=True)
             except Exception:
                 continue
+            finally:
+                echo_guard.end()
 
 
 _default = None
@@ -79,8 +84,11 @@ def say(text, voice=None):
 def say_sync(text, voice=None):
     try:
         out = _TMP / f"tts_sync_{abs(hash(text)) % 10**8}.mp3"
+        echo_guard.begin()
         _synthesize(text, out, voice or VOICE)
         _play(out)
         out.unlink(missing_ok=True)
     except Exception as e:
         return str(e)
+    finally:
+        echo_guard.end()

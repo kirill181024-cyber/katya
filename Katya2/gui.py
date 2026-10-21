@@ -84,6 +84,11 @@ class KatyaApp(ctk.CTk):
             ac.init(notify=lambda t: self.after(0, self._notify, t))
         except Exception:
             pass
+        try:
+            import skills.game_analyst as ga
+            ga.init(notify=lambda t: self.after(0, self._append, "ТРЕНЕР", t, "skill"))
+        except Exception:
+            pass
 
         self._build_sidebar()
         self._build_chat()
@@ -216,6 +221,16 @@ class KatyaApp(ctk.CTk):
     def _handle(self, text):
         self.busy = True
         self._set_status("Думаю", "◌ обработка запроса", ACCENT)
+
+        trigger = brain.detect_trigger(text)
+        if trigger:
+            self._append("НАВЫК", trigger, "skill")
+            out = skills_loader.run(trigger, {})
+            self._append("KATYA", out, "katya")
+            self.speaker.say(out)
+            self.busy = False
+            self._set_status("Онлайн", "● ollama подключена", ACCENT_2)
+            return
 
         def _worker():
             result = self.brain.ask(text)
