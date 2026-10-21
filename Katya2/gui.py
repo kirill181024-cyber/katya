@@ -204,7 +204,7 @@ class KatyaApp(ctk.CTk):
                               "Что взламываем сегодня?", "katya")
         if not ok:
             self._append("СИСТЕМА", "Ollama не найдена на 127.0.0.1:11434. "
-                                    "Запусти `ollama serve` и модель qwen2.5:7b.", "system")
+                                    "Запусти `ollama serve` и модель gemma3:4b.", "system")
 
     def _notify(self, text):
         self._append("KATYA", text, "katya")

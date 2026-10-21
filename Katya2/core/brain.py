@@ -7,10 +7,12 @@ import urllib.request
 from . import skills_loader
 
 try:
-    from config import MODEL, OLLAMA_URL
+    from config import MODEL, OLLAMA_URL, NUM_GPU, TEXT_NUM_CTX
 except Exception:
     OLLAMA_URL = "http://127.0.0.1:11434"
-    MODEL = "qwen2.5:7b"
+    MODEL = "gemma3:4b"
+    NUM_GPU = 999
+    TEXT_NUM_CTX = 4096
 
 PERSONA = (
     "Ты — Катя 2.10, ультимативный локальный ИИ-агент для Windows. "
@@ -80,7 +82,8 @@ def _api(messages, system, timeout):
         "model": MODEL,
         "messages": [{"role": "system", "content": system}] + messages,
         "stream": False,
-        "options": {"temperature": 0.6, "num_ctx": 4096},
+        "options": {"temperature": 0.6, "num_ctx": TEXT_NUM_CTX,
+                    "num_gpu": NUM_GPU},
     }).encode("utf-8")
     req = urllib.request.Request(
         OLLAMA_URL + "/api/chat", data=payload,
@@ -126,7 +129,7 @@ class Brain:
         """Полный цикл: LLM -> возможно действие -> LLM с результатом.
         Возвращает dict {reply, action, error?}."""
         if not available():
-            return {"reply": "Оллама не отвечает. Запусти ollama serve и проверь модель qwen2.5:7b.",
+            return {"reply": "Оллама не отвечает. Запусти ollama serve и проверь модель gemma3:4b.",
                     "action": None, "error": "ollama_down"}
 
         user_msg = user_text if tool_result is None else \

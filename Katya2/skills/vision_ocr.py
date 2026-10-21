@@ -12,7 +12,7 @@ import urllib.request
 from datetime import datetime
 from pathlib import Path
 
-from config import MODEL, OLLAMA_URL
+from config import MODEL, NUM_GPU, OLLAMA_URL, TEXT_NUM_CTX, VISION_MODEL, VISION_NUM_CTX
 
 _SHOTS = Path(os.path.expanduser("~")) / "Pictures"
 _SHOTS.mkdir(parents=True, exist_ok=True)
@@ -61,7 +61,7 @@ def _region_tuple(region):
 
 
 def _ocr_text(img):
-    """Пытается распознать текст: сначала pytesseract, потом vision llava."""
+    """Пытается распознать текст: сначала pytesseract, потом vision-модель."""
     try:
         import pytesseract
         return pytesseract.image_to_string(img, lang="rus+eng").strip()
@@ -71,13 +71,14 @@ def _ocr_text(img):
 
 
 def _vision_ask(image_bytes, prompt):
-    vmodel = "llava"
+    vmodel = VISION_MODEL
     payload = json.dumps({
         "model": vmodel,
         "prompt": prompt,
         "images": [base64.b64encode(image_bytes).decode("ascii")],
         "stream": False,
         "keep_alive": "30m",
+        "options": {"num_ctx": VISION_NUM_CTX, "num_gpu": NUM_GPU},
     }).encode("utf-8")
     req = urllib.request.Request(OLLAMA_URL + "/api/generate", data=payload,
                                  headers={"Content-Type": "application/json"})
@@ -91,7 +92,8 @@ def _text_ask(text, prompt):
         "model": MODEL,
         "messages": [{"role": "user", "content": prompt + "\n\n" + text}],
         "stream": False,
-        "options": {"temperature": 0.4},
+        "options": {"temperature": 0.4, "num_ctx": TEXT_NUM_CTX,
+                    "num_gpu": NUM_GPU},
     }).encode("utf-8")
     req = urllib.request.Request(OLLAMA_URL + "/api/chat", data=payload,
                                  headers={"Content-Type": "application/json"})
@@ -154,7 +156,7 @@ ACTIONS = {
                           "params": {"region": "область left,top,w,h (опционально)"}},
     "vision.ocr": {"func": read_screen, "desc": "Распознать текст с экрана (OCR)",
                    "params": {"region": "область left,top,w,h (опционально)"}},
-    "vision.analyze": {"func": analyze_screen, "desc": "Vision-анализ экрана моделью llava",
+    "vision.analyze": {"func": analyze_screen, "desc": "Vision-анализ экрана моделью gemma3:4b",
                        "params": {"question": "что спросить про экран"}},
     "vision.errors": {"func": analyze_errors, "desc": "Найти ошибку в коде на экране и объяснить",
                       "params": {"region": "область left,top,w,h (опционально)"}},

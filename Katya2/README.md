@@ -5,7 +5,7 @@
 ![Katya 2.10](banner.svg)
 
 ![Python](https://img.shields.io/badge/python-3.11%2B-00E5FF?style=flat-square)
-![Ollama](https://img.shields.io/badge/Ollama-qwen2.5%3A7b%20%2B%20llava-39FF14?style=flat-square)
+![Ollama](https://img.shields.io/badge/Ollama-gemma3%3A4b%20(GPU)-39FF14?style=flat-square)
 ![UI](https://img.shields.io/badge/UI-CustomTkinter-00E5FF?style=flat-square)
 ![STT](https://img.shields.io/badge/STT-Vosk-39FF14?style=flat-square)
 ![TTS](https://img.shields.io/badge/TTS-edge--tts%20Dmitry-00E5FF?style=flat-square)
@@ -33,7 +33,7 @@
 Всеядный тренер по любой игре — **Roblox, шутеры, RPG**:
 
 - `skills/game_analyst.py` захватывает кадр активной игры через **`mss`** (сверхбыстро, без просадки FPS).
-- Кадр сжимается и уходит в локальную **vision-модель `llava`** через API Ollama.
+- Кадр сжимается и уходит в локальную **vision-модель `gemma3:4b`** через API Ollama — целиком на GPU.
 - Промпт «киберспортивный тренер» разбирает интерфейс, HP/ману, кулдауны скиллов, позицию.
 - Вердикт мгновенно озвучивается через `core/tts.py`.
 
@@ -47,7 +47,7 @@
 
 ## 👁️ Фича №4 — Vision OCR
 
-`skills/vision_ocr.py`: скриншот экрана/области, OCR через `pytesseract` (rus+eng), а при его отсутствии — распознавание vision-моделью `llava`. Умеет разбирать **ошибки в коде с экрана**.
+`skills/vision_ocr.py`: скриншот экрана/области, OCR через `pytesseract` (rus+eng), а при его отсутствии — распознавание vision-моделью `gemma3:4b`. Умеет разбирать **ошибки в коде с экрана**.
 
 ## 🕶️ Фича №5 — Протоколы Marvel
 
@@ -78,7 +78,7 @@ ACTIONS = {
 - **Интерфейс:** CustomTkinter (HUD, палитра `#0B0E12` + неон `#22D3EE` / `#34D399`)
 - **Слух:** Vosk (автоскачивание `vosk-model-small-ru-0.22`)
 - **Голос:** edge-tts (`ru-RU-DmitryNeural`)
-- **Мозг:** Ollama `http://localhost:11434` — текст `qwen2.5:7b`, vision `llava`
+- **Мозг:** Ollama `http://localhost:11434` — `gemma3:4b` (текст + vision, 100% GPU)
 - **Компьютер:** pyautogui · mss · Pillow · opencv-python · pytesseract
 - **Система:** psutil · pycaw · screen_brightness_control · pywinauto · yt-dlp
 
@@ -90,7 +90,7 @@ ACTIONS = {
 ЗАПУСТИТЬ.bat
 ```
 
-`ЗАПУСТИТЬ.bat` сам проверит Ollama, создаст venv, поставит зависимости, подтянет модели **`qwen2.5:7b`** и **`llava`** и запустит Катю. Без регистраций и аккаунтов.
+`ЗАПУСТИТЬ.bat` сам проверит Ollama, создаст venv, поставит зависимости, подтянет модель **`gemma3:4b`** (текст + vision, работает на GPU) и запустит Катю. Без регистраций и аккаунтов.
 
 Вручную:
 
@@ -99,8 +99,7 @@ git clone https://github.com/kirill181024-cyber/katya.git
 cd katya/Katya2
 python -m venv .venv
 .venv\Scripts\python.exe -m pip install -r requirements.txt
-ollama pull qwen2.5:7b
-ollama pull llava
+ollama pull gemma3:4b
 .venv\Scripts\pythonw.exe main.py
 ```
 
@@ -122,7 +121,7 @@ ollama pull llava
 Katya2/
 ├─ main.py                  # точка входа
 ├─ gui.py                   # CustomTkinter HUD
-├─ config.py                # Ollama URL, модели qwen2.5:7b / llava
+├─ config.py                # Ollama URL, модель gemma3:4b, GPU-параметры
 ├─ ЗАПУСТИТЬ.bat            # one-click запуск
 ├─ core/
 │  ├─ brain.py              # Ollama + агентный JSON-цикл + голосовые триггеры
@@ -136,7 +135,7 @@ Katya2/
    ├─ window_manager.py     # раскладка/фокус/скрытие окон
    ├─ computer_use.py       # мышь, клавиатура, цепочки действий (pyautogui)
    ├─ vision_ocr.py         # скриншот + OCR + анализ ошибок
-   ├─ game_analyst.py       # Cyber-Coach: mss + llava + TTS
+   ├─ game_analyst.py       # Cyber-Coach: mss + gemma3:4b (GPU) + TTS
    ├─ marvel_protocols.py   # Overclock + «Спрячь палево»
    ├─ media.py              # буфер + yt-dlp (видео/аудио/пачка ссылок)
    ├─ media_downloader.py   # yt-dlp скачивание

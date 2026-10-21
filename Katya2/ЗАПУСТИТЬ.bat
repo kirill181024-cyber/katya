@@ -49,9 +49,8 @@ if errorlevel 1 (
 )
 
 rem ---------- models ----------
-echo [4/5] Pulling AI models (qwen2.5:7b and llava). This can take a while ...
-ollama pull qwen2.5:7b
-ollama pull llava
+echo [4/5] Pulling AI model (gemma3:4b, runs on GPU). This can take a while ...
+ollama pull gemma3:4b
 
 rem ---------- run ----------
 echo [5/5] Launching Katya ...

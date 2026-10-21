@@ -1,7 +1,7 @@
 """Протокол «Cyber-Coach» — гейминг-аналитик.
 
-Захват кадров активной игры через mss и анализ vision-моделью llava
-локальной Ollama. Вердикты тренера озвучиваются через core.tts.
+Захват кадров активной игры через mss и анализ vision-моделью (gemma3:4b)
+локальной Ollama — целиком на GPU. Вердикты озвучиваются через core.tts.
 """
 
 import base64
@@ -12,7 +12,8 @@ import urllib.request
 
 import numpy as np
 
-from config import COACH_INTERVAL, COACH_MAX_WIDTH, OLLAMA_URL, VISION_MODEL
+from config import (COACH_INTERVAL, COACH_MAX_WIDTH, NUM_GPU, OLLAMA_URL,
+                    VISION_MODEL, VISION_NUM_CTX)
 
 try:
     import mss
@@ -20,14 +21,12 @@ except Exception:
     mss = None
 
 COACH_PROMPT = (
-    "Ты — харизматичный киберспортивный тренер и про-геймер. "
-    "Посмотри на этот актуальный кадр из игры пользователя "
-    "(если это Roblox, он играет за класс Тень со способностями Warrior). "
-    "Мгновенно проанализируй интерфейс, полоски здоровья/маны, кулдауны "
-    "скиллов и ситуацию на экране. Коротко, емко, с геймерским юмором "
-    "прокомментируй текущий момент и скажи, какое комбо или тактическое "
-    "действие нужно предпринять прямо сейчас для победы. "
-    "Ответь 1-3 предложениями по-русски."
+    "Ты — харизматичный киберспортивный тренер. Это кадр игрового экрана "
+    "(в Roblox игрок — класс Тень со способностями Warrior). Опиши экран: "
+    "полоски здоровья и маны, кулдауны скиллов, ситуацию. Затем одной фразой "
+    "по-русски дай геймерский совет — какое комбо или действие делать сейчас. "
+    "Не отказывайся, не рассуждай о своих возможностях, только разбор и совет. "
+    "Отвечай по-русски, коротко."
 )
 
 _lock = threading.Lock()
@@ -75,7 +74,8 @@ def _ask_llava(image_bytes, prompt):
         "images": [base64.b64encode(image_bytes).decode("ascii")],
         "stream": False,
         "keep_alive": "30m",
-        "options": {"temperature": 0.7},
+        "options": {"temperature": 0.4, "num_ctx": VISION_NUM_CTX,
+                    "num_gpu": NUM_GPU, "num_predict": 120},
     }).encode("utf-8")
     req = urllib.request.Request(
         OLLAMA_URL + "/api/generate", data=payload,
@@ -96,13 +96,13 @@ def vision_ready():
 
 
 def analyze_once():
-    """Один кадр: захват -> llava -> озвучка. Возвращает текст вердикта."""
+    """Один кадр: захват -> vision-модель -> озвучка. Возвращает вердикт."""
     from core import tts
     img = _grab_screen()
     if img is None:
         return "Не смогла захватить экран. Проверь библиотеку mss."
     if not vision_ready():
-        return "Vision-модель llava не найдена. Скажи: ollama pull llava."
+        return f"Vision-модель {VISION_MODEL} не найдена. Скажи: ollama pull {VISION_MODEL}."
     try:
         verdict = _ask_llava(img, COACH_PROMPT)
     except Exception as e:

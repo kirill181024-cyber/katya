@@ -57,7 +57,7 @@ where ollama >nul 2>nul
 if errorlevel 1 (
   echo [NOTE] Ollama not found. Katya needs it for the AI brain.
   echo        Download: https://ollama.com/download
-  echo        After install, open a console and run:  ollama pull qwen2.5:7b
+  echo        After install, open a console and run:  ollama pull gemma3:4b
   echo.
 )
 

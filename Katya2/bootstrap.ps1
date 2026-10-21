@@ -125,12 +125,12 @@ Ok "Ollama: $ollamaExe"
 # 4) model
 if (Ensure-OllamaRunning $ollamaExe) {
     $list = & $ollamaExe list 2>&1 | Out-String
-    if ($list -notmatch "qwen2\.5") {
+    if ($list -notmatch "gemma3") {
         Write-Host ""
-        Info "Downloading AI model qwen2.5:7b (~4.7 GB). This can take a while ..."
-        & $ollamaExe pull qwen2.5:7b
+        Info "Downloading AI model gemma3:4b (~3.4 GB, runs on GPU). This can take a while ..."
+        & $ollamaExe pull gemma3:4b
     } else {
-        Ok "Model qwen2.5:7b already present"
+        Ok "Model gemma3:4b already present"
     }
 } else {
     Warn "Ollama service is not responding; the model will download on first run."
