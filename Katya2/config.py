@@ -3,7 +3,7 @@
 OLLAMA_URL = "http://127.0.0.1:11434"
 MODEL = "gemma3:4b"
 VISION_MODEL = "gemma3:4b"
-VERSION = "2.10"
+VERSION = "2.10.1"
 
 # --- Ускорение на GPU (NVIDIA) ---
 # num_gpu=999 => выгружать все слои на видеокарту.

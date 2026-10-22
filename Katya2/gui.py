@@ -23,7 +23,7 @@ WARN = "#FBBF24"
 FONT = "Segoe UI"
 MONO = "Consolas"
 
-VERSION = "2.10"
+VERSION = "2.10.1"
 
 ctk.set_appearance_mode("dark")
 
