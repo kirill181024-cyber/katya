@@ -14,4 +14,9 @@ def main():
 
 
 if __name__ == "__main__":
+    try:
+        import multiprocessing
+        multiprocessing.freeze_support()
+    except Exception:
+        pass
     main()

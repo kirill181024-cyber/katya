@@ -39,7 +39,9 @@ except Exception:
 # ----------------------------------------------------------------------------
 
 def _python_exe():
-    """Возвращает путь к python для фоновых pip-операций."""
+    """Путь к python для фоновых pip-операций. None в exe-режиме (всё вшито)."""
+    if getattr(sys, "frozen", False):
+        return None
     cand = APP_DIR / ".venv" / "Scripts" / "python.exe"
     if cand.exists():
         return str(cand)
@@ -89,6 +91,16 @@ def _ollama_ready(timeout=120):
     return False
 
 
+def _diag(msg):
+    """Диагностический лог установщика в %TEMP%\\katya_setup.log."""
+    try:
+        p = Path(os.environ.get("TEMP", ".")) / "katya_setup.log"
+        with open(p, "a", encoding="utf-8") as f:
+            f.write(f"[{time.strftime('%H:%M:%S')}] {msg}\n")
+    except Exception:
+        pass
+
+
 # ----------------------------------------------------------------------------
 # Графический установщик
 # ----------------------------------------------------------------------------
@@ -103,6 +115,7 @@ class SetupWizard:
         self.app.resizable(False, False)
         self.app.protocol("WM_DELETE_WINDOW", self._on_close)
         self.done = False
+        self._should_launch = False
         self._build_ui()
 
     def _build_ui(self):
@@ -177,8 +190,13 @@ class SetupWizard:
     # ------------------------------------------------------------------
     def step_python(self):
         self.set_step("Шаг 1/4 — Проверка Python и библиотек")
-        req = APP_DIR / "requirements.txt"
         py = _python_exe()
+        if py is None:
+            # exe-режим: все зависимости уже вшиты в исполняемый файл
+            self.set_log("Запуск из exe: зависимости уже встроены.")
+            self.set_progress(0.25)
+            return
+        req = APP_DIR / "requirements.txt"
         if not req.exists():
             self.set_log("requirements.txt не найден — пропускаю.")
             self.set_progress(0.25)
@@ -272,22 +290,22 @@ class SetupWizard:
 
     def _launch_main(self):
         try:
-            self.set_log("Стартую main.py...")
+            _diag("_launch_main: start")
+            self.set_log("Всё готово! Открываю неоновый интерфейс...")
             py = _python_exe()
             main = APP_DIR / "main.py"
-            if getattr(sys, "frozen", False):
-                # exe-режим: запускаем встроенный интерфейс напрямую
-                try:
-                    from gui import run
-                    self.app.after(200, self.app.destroy)
-                    run()
-                    return
-                except Exception:
-                    pass
-            subprocess.Popen([py, str(main)], cwd=str(APP_DIR),
-                             creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+            if getattr(sys, "frozen", False) or py is None:
+                # exe-режим: интерфейс откроем в ГЛАВНОМ потоке после закрытия мастера
+                _diag("_launch_main: frozen, set launch flag")
+                self._should_launch = True
+                self._ui(self.app.quit)
+                return
+            if py is not None:
+                _diag("_launch_main: Popen python main.py")
+                subprocess.Popen([py, str(main)], cwd=str(APP_DIR),
+                                 creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
         except Exception:
-            pass
+            _diag("_launch_main: outer fail:\n" + traceback.format_exc())
         self._ui(self.app.destroy)
         os._exit(0)
 
@@ -295,11 +313,16 @@ class SetupWizard:
     def run(self):
         def worker():
             try:
+                _diag("worker: step_python")
                 self.step_python()
+                _diag("worker: step_ollama")
                 self.step_ollama()
+                _diag("worker: step_models")
                 self.step_models()
+                _diag("worker: step_launch")
                 self.step_launch()
             except Exception:
+                _diag("worker fail:\n" + traceback.format_exc())
                 self.set_log("Что-то пошло не так, но я продолжаю:\n" +
                              traceback.format_exc()[:200])
                 try:
@@ -310,7 +333,20 @@ class SetupWizard:
         try:
             self.app.mainloop()
         except Exception:
+            _diag("mainloop fail:\n" + traceback.format_exc())
+        # после закрытия мастера запускаем интерфейс в ГЛАВНОМ потоке
+        try:
+            self.app.destroy()
+        except Exception:
             pass
+        if self._should_launch:
+            _diag("run: launching gui in main thread")
+            try:
+                from gui import run as gui_run
+                gui_run()
+                _diag("run: gui_run returned")
+            except Exception:
+                _diag("run: gui_run fail:\n" + traceback.format_exc())
 
 
 def main():
@@ -330,6 +366,11 @@ def main():
 
 
 if __name__ == "__main__":
+    try:
+        import multiprocessing
+        multiprocessing.freeze_support()
+    except Exception:
+        pass
     try:
         main()
     except Exception:
