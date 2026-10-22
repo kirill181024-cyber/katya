@@ -20,3 +20,5 @@ Katya2/tmp/
 pkg/
 
 dist_setup/
+build_exe_work/
+dist_exe/
