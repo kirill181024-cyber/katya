@@ -1,0 +1,20 @@
+# Katya 2.11.0 — Marvel-Swarm Edition
+# Python 3.10+ (tested on Windows 11)
+
+customtkinter>=5.2.2
+psutil>=5.9.8
+Pillow>=10.4.0
+requests>=2.31.0
+sounddevice>=0.4.7
+soundfile>=0.12.1
+numpy>=1.26.0
+vosk>=0.3.45
+edge-tts>=6.1.12
+mss>=9.0.1
+opencv-python>=4.10.0.84
+pycaw>=20240210
+comtypes>=1.4.6
+pyautogui>=0.9.54
+pywinauto>=0.6.9
+beautifulsoup4>=4.12.3
+yt-dlp>=2024.12.13

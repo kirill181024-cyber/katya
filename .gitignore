@@ -1,0 +1,57 @@
+# Secrets — never commit
+.env
+.env.*
+*.token
+*.secret
+secrets.json
+settings.json
+.ssh/
+
+# Python
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Runtime data and caches
+data/
+data_test/
+logs/
+*.log
+*.mp3
+*.wav
+*.part
+OllamaSetup.exe
+.tmp/
+.pip-cache/
+katya_hud*.png
+katya_neuro.png
+katya_protocols.png
+
+# Models
+models/
+vosk-model-*/
+*.onnx
+*.gguf
+*.bin
+
+# OS / editors
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.bak
+*.tmp
+
+# Build artifacts
+build/
+dist/
+*.spec
